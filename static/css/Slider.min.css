@@ -1,0 +1,192 @@
+/* ========================= */
+/* Glider.js Base Styling */
+/* ========================= */
+.glider, .glider-contain {
+    margin: 0 auto;
+    position: relative;
+}
+
+.glider, .glider-track {
+    transform: translateZ(0);
+}
+
+/* Remove default focus outline & padding */
+.glider-dot, .glider-next, .glider-prev {
+    border: 0;
+    padding: 0;
+    user-select: none;
+    outline: 0;
+}
+
+/* Ensure full width usage */
+.glider-contain {
+    width: 100%;
+}
+
+/* ========================= */
+/* Smooth Scrolling */
+/* ========================= */
+.glider {
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+}
+
+/* Flexbox for smooth sliding */
+.glider-track {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    z-index: 1;
+    display: flex;
+    gap: 20px; /* Adjust space between slides */
+    padding: 10px;
+    justify-content: center;
+}
+
+/* ========================= */
+/* Draggable Effect */
+/* ========================= */
+.glider.draggable {
+    user-select: none;
+    cursor: grab;
+}
+
+.glider.draggable .glider-slide img {
+    user-select: none;
+    pointer-events: none;
+}
+
+.glider.drag {
+    cursor: grabbing;
+}
+
+/* ========================= */
+/* Slide Styling */
+/* ========================= */
+.glider-slide {
+    user-select: none;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    min-width: 180px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.glider-slide img {
+    max-width: 100%;
+    transition: opacity 0.3s ease;
+}
+
+/* ========================= */
+/* Hide Scrollbar */
+/* ========================= */
+.glider::-webkit-scrollbar {
+    opacity: 0;
+    height: 0;
+}
+
+/* ========================= */
+/* Navigation Arrows */
+/* ========================= */
+.glider-next, .glider-prev {
+    position: absolute;
+    background: none;
+    z-index: 10;
+    font-size: 40px;
+    text-decoration: none;
+    cursor: pointer;
+    color: #666;
+    opacity: 1;
+    line-height: 1;
+    transition: opacity 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67), color 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+/* Arrow positioning */
+.glider-prev {
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.glider-next {
+    right: -30px;
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Hover Effect */
+.glider-next:hover, .glider-prev:hover {
+    color: #ff6600;
+}
+
+/* Disabled Navigation Arrows */
+.glider-next.disabled, .glider-prev.disabled {
+    opacity: 0.4;
+    color: #666;
+    cursor: default;
+}
+
+/* ========================= */
+/* Navigation Dots */
+/* ========================= */
+.glider-dots {
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    margin: 10px auto;
+    padding: 0;
+    gap: 5px;
+}
+
+/* Individual Dots */
+.glider-dot {
+    display: block;
+    cursor: pointer;
+    border-radius: 50%;
+    background: #ccc;
+    width: 10px;
+    height: 10px;
+    transition: background 0.3s ease;
+}
+
+/* Hover effect */
+.glider-dot:hover {
+    background: #ddd;
+}
+
+/* Active Dot */
+.glider-dot.active {
+    background: #ff6600;
+}
+
+/* ========================= */
+/* Mobile Adjustments */
+/* ========================= */
+@media (max-width: 768px) {
+    /* Show scrollbar for better usability */
+    .glider::-webkit-scrollbar {
+        opacity: 1;
+        -webkit-appearance: none;
+        width: 5px;
+        height: 3px;
+    }
+
+    .glider::-webkit-scrollbar-thumb {
+        opacity: 1;
+        border-radius: 99px;
+        background-color: rgba(156, 156, 156, 0.25);
+        -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.25);
+        box-shadow: 0 0 1px rgba(255, 255, 255, 0.25);
+    }
+
+    /* Smaller navigation arrows */
+    .glider-prev, .glider-next {
+        font-size: 30px;
+        left: 10px;
+        right: 10px;
+    }
+}

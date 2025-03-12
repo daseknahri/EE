@@ -1,0 +1,576 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} - SiyaRam{% endblock %}
+{% block content %}
+<div id="pr">
+    <div class="product-detail-container">
+        <!-- Image Section -->
+        <div class="image-section">
+            <img id="main-image" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+    
+            <!-- Thumbnails Below Main Image -->
+            <div class="product-gallery">
+                {% for image in product.images.all %}
+                    <img class="gallery-image" src="{{ image.image.url }}" alt="{{ product.name }}" data-large="{{ image.image.url }}">
+                {% endfor %}
+            </div>
+        </div>
+    
+        <!-- Product Information Section -->
+        <div class="product-info">
+            <div class="product-cart-style">
+                <h1>{{ product.name }}</h1>
+                <p><strong>Catégorie:</strong> {{ product.category.name }}</p>
+                <p class="product-price"><strong>Prix:</strong> {{ product.price }} MAD</p>
+                <p class="product-description">{{ product.description }}</p>
+            
+        
+                <!-- Addons Section -->
+                {% if product.addons.all %}
+                    <div class="product-addons">
+                        <h3>Choisissez des addons (50% de réduction)</h3>
+                        <div class="addons-list">
+                            {% for addon in addons %}
+                                <label class="addon-item">
+                                    <input type="checkbox" class="addon-checkbox" data-price="{{ addon.add.price }}" data-addon-id="{{ addon.add.id }}" data-addon-Name="{{ addon.add.name }}">
+                                    <div class="addon-content">
+                                        <img src="{{ addon.add.images.first.image.url }}" alt="{{ addon.add.name }}" class="addon-image">
+                                        <div class="addon-details">
+                                            <p class="addon-name">{{ addon.add.name }}</p>
+                                            <p class="addon-pricing">
+                                                <span class="original-price">{{ addon.add.price }} MAD</span>
+                                                <span class="discounted-price">{{ addon.discounted_price }} MAD</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Shipping Section -->
+            <div class="shipping-section">
+                <h3>Sélectionner la livraison</h3>
+                <div class="shipping-options">
+                    <label>
+                        <input type="radio" name="shipping" value="10" id="inside-tanger"> Dans Tanger (10 MAD)
+                    </label>
+                    <label>
+                        <input type="radio" name="shipping" value="30" id="outside-tanger"> Hors de Tanger (30 MAD)
+                    </label>
+                </div>
+            </div>
+    
+            <!-- Price & Shipping Section (Invoice Style) -->
+            <div class="price-shipping-section">
+                <div class="price-info">
+                    <div class="invoice-row">
+                        <span>Prix du produit</span><span><span id="total-price">{{ product.price }}</span>MAD</span>
+                    </div>
+                    <div class="invoice-row">
+                        <span>Frais de livraison</span><span id="shipping-fee">10 MAD</span>
+                    </div>
+                    {% if product.addons.all %}
+                    <div class="invoice-row">
+                        <span><strong>Addon sélectionnés:</strong></span>
+                        <ul id="addons-list"></ul>
+                    </div>
+                    {% endif %}
+                    <div class="invoice-row final">
+                        <span><strong>Prix final</strong></span><span><strong><span id="final-price">{{ product.price }}</span>MAD</strong></span>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Button Section -->
+            <div class="order-button-container">
+                <button id="open-modal-btn" class="btn-place-order">Passer la commande</button>
+            </div>
+        </div>
+    </div>
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <h2 class="faq-title">FAQs</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Détails de la livraison</span>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Les détails concernant la livraison seront fournis lors de votre commande.</p>
+                    <p>Grand Ville: <24h</p>
+                    <p>Grand Ville: 1-2j</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Mon Box est endommagé, que faire?</span>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>En cas de dommages pendant le transport de votre commande, veuillez prendre des photos des articles endommagés et les envoyer à notre équipe dans les 3 jours ouvrables suivant la réception de votre commande.</p>
+                    <p>Il est impératif de signaler le problème dans ce délai afin que nous puissions traiter votre réclamation.</p>
+                    <p>Les réclamations signalées après cette période ne pourront malheureusement pas être prises en considération.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Que faire en cas de livraison non conforme ?</span>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Si vous recevez par erreur un produit différent de celui que vous avez commandé, veuillez nous contacter dans les 3 jours ouvrables suivant la réception de votre commande.</p>
+                    <p>Nous vous prions de bien vouloir prendre des photos du produit reçu et de nous les envoyer.</p>
+                    <p>Notre équipe s'occupera immédiatement de résoudre le problème et de trouver une solution satisfaisante pour vous.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Mauvaise adresse / colis non livrée</span>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Veuillez noter que nous ne pouvons être tenus responsables des colis perdus en raison d'une adresse incorrecte fournie par le client ou si le colis est refusé à destination.</p>
+                    <p>Il incombe au client de fournir une adresse de livraison correcte et de s'assurer que le colis peut être réceptionné à destination.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="features-section">
+        <div class="feature-item">
+            <i class="fas fa-comments feature-icon"></i>
+            <p>1400+ Clients Satisfaits</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-headset feature-icon"></i>
+            <p>Support Client 24/7</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-shipping-fast feature-icon"></i>
+            <p>Livraison Gratuite Partout au Maroc</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-hand-holding-usd feature-icon"></i>
+            <p>Satisfait ou Remboursé</p>
+        </div>
+    </div>
+</div>
+<div id="order-modal" class="modal">
+    <div class="modal-content">
+        <span id="close-modal-btn" class="close-btn">&times;</span>
+        <form method="post" action="{% url 'checkout' %}" class="checkout-form">
+            {% csrf_token %}
+            <h3>Place Your Order</h3>
+            <input type="text" name="name" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="phone" placeholder="Phone Number" required>
+            <textarea name="address" placeholder="Delivery Address" required></textarea>
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            
+            <!-- Addons as Hidden Input (Sent with the form) -->
+            <input type="hidden" name="addons" id="addons-input">
+            
+            <button type="submit" class="btn btn-primary">Place Order</button>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const faqItems = document.querySelectorAll(".faq-item");
+        const addonCheckboxes = document.querySelectorAll(".addon-checkbox");
+        const shippingRadios = document.querySelectorAll("input[name='shipping']");
+        const totalPriceElement = document.getElementById("total-price");
+        const finalPriceElement = document.getElementById("final-price");
+        const shippingFeeElement = document.getElementById("shipping-fee");
+        const addonsListElement = document.getElementById("addons-list");
+        const basePrice = parseFloat(totalPriceElement.innerText.replace('MAD', ''));
+        faqItems.forEach((item) => {
+            const question = item.querySelector(".faq-question");
+            const answer = item.querySelector(".faq-answer");
+            const icon = question.querySelector("i");
+
+            question.addEventListener("click", function () {
+                const isOpen = answer.classList.contains("active");
+
+                // Close all FAQ answers first
+                document.querySelectorAll(".faq-answer").forEach((ans) => {
+                    ans.classList.remove("active");
+                    ans.previousElementSibling.querySelector("i").classList.replace("fa-minus", "fa-plus");
+                });
+
+                // Toggle current FAQ answer
+                if (!isOpen) {
+                    answer.classList.add("active");
+                    icon.classList.replace("fa-plus", "fa-minus");
+                } else {
+                    answer.classList.remove("active");
+                    icon.classList.replace("fa-minus", "fa-plus");
+                }
+            });
+        });
+        let shippingFee = 20;
+        let selectedAddons = [];
+            // Shipping Fee Calculation
+        shippingRadios.forEach(radio => {
+            radio.addEventListener("change", function() {
+                shippingFee = parseFloat(this.value);
+                updateTotalPrice();
+            });
+        });
+
+    // Addon Selection
+        addonCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", function() {
+                const addonName = this.dataset.addonName;
+                const addonPrice = parseFloat(this.dataset.price);
+                
+                if (this.checked) {
+                    selectedAddons.push({ name: addonName, price: addonPrice });
+                } else {
+                    selectedAddons = selectedAddons.filter(addon => addon.name !== addonName);
+                }
+
+                updateAddonList();
+                updateTotalPrice();
+            });
+        });
+            // Update Addon List
+        function updateAddonList() {
+            addonsListElement.innerHTML = '';
+            selectedAddons.forEach(addon => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `${addon.name}: ${addon.price / 2} MAD`;
+                addonsListElement.appendChild(listItem);
+            });
+        }
+
+        // Update Total Price
+        function updateTotalPrice() {
+            const addonTotal = selectedAddons.reduce((total, addon) => total + addon.price / 2, 0);
+            const total = basePrice + addonTotal + shippingFee;
+
+            totalPriceElement.innerText = basePrice + addonTotal;
+            shippingFeeElement.innerText = `${shippingFee} MAD`;
+            finalPriceElement.innerText = total.toFixed(2);
+        }
+        updateTotalPrice();
+        const buyNowButton = document.getElementById("open-modal-btn");
+        const addonsInput = document.getElementById("addons-input");
+        const orderModal = document.getElementById("order-modal");
+        const closeModalBtn = document.getElementById("close-modal-btn");
+
+        buyNowButton.addEventListener("click", function () {
+            orderModal.style.display = "block";
+            
+            // Collect the selected addon IDs
+            let selectedAddons = [];
+            addonCheckboxes.forEach(function (checkbox) {
+                if (checkbox.checked) {
+                    selectedAddons.push(checkbox.dataset.addonId);
+                }
+            });
+
+            // Set the selected addons in the hidden input
+            addonsInput.value = selectedAddons.join(',');
+        });
+
+        // Close the modal when the close button is clicked
+        closeModalBtn.addEventListener("click", function () {
+            orderModal.style.display = "none";
+        });
+
+        // Close the modal if the user clicks outside of it
+        window.addEventListener("click", function(event) {
+            if (event.target == orderModal) {
+                orderModal.style.display = "none";
+            }
+        });
+        // Select all small images and main image
+        const galleryImages = document.querySelectorAll(".gallery-image");
+        const mainImage = document.getElementById("main-image");
+
+        // Add click event to each gallery image
+        galleryImages.forEach(image => {
+            image.addEventListener("click", function () {
+                // Get the clicked image's URL and set it as the main image's source
+                const largeImageUrl = this.getAttribute("data-large");
+                mainImage.src = largeImageUrl;
+            });
+        });
+    });
+</script>
+
+<style>
+/* General Styles */
+.shipping-section, .price-shipping-section, .order-button-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Shipping Section */
+.shipping-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.shipping-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shipping-options label {
+    display: flex;
+    align-items: center;
+    background: #f7f7f7;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.shipping-options input[type="radio"] {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.shipping-options label:hover {
+    background: #eaeaea;
+}
+
+/* Price & Shipping Section */
+.price-shipping-section {
+    padding: 20px;
+    background: #f9f9f9;
+}
+
+.invoice-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+.invoice-row span {
+    font-weight: 500;
+}
+
+.invoice-row.final span {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+}
+
+/* Selected Addons List */
+#addons-list {
+    padding-left: 20px;
+    font-size: 14px;
+    color: #444;
+}
+
+/* Order Button */
+.order-button-container {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.btn-place-order {
+    background: #ff6600;
+    color: #fff;
+    font-size: 16px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-weight: bold;
+}
+
+.btn-place-order:hover {
+    background: #e65c00;
+}
+/* Features Section */
+.features-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px;  /* Increased spacing */
+    padding: 50px 20px;
+    margin-top: 50px;
+}
+
+/* Individual Feature Box */
+.feature-item {
+    text-align: center;
+    font-size: 18px;
+    color: #222;
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    max-width: 200px;
+}
+
+/* FontAwesome Icons */
+.feature-icon {
+    font-size: 50px;
+    color: #333;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Hover Effect */
+.feature-item:hover .feature-icon {
+    transform: scale(1.1);
+    color: #ff6600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .features-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+    }
+}
+/* FAQ Section Styling */
+.faq-section {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 40px 20px;
+    border-radius: 10px;
+    font-family: "Poppins", serif;
+}
+
+/* FAQ Title */
+.faq-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+/* FAQ Container */
+.faq-container {
+    border-top: 1px solid #ddd;
+}
+
+/* FAQ Items */
+.faq-item {
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+/* FAQ Question */
+.faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 10px;
+}
+
+/* FAQ Answer */
+.faq-answer {
+    font-size: 16px;
+    color: #444;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+/* Active Answer */
+.faq-answer.active {
+    max-height: 200px;
+    opacity: 1;
+    padding: 10px 15px;
+}
+
+/* Icons */
+.faq-question i {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+/* Rotating icon when active */
+.faq-item.active .faq-question i {
+    transform: rotate(180deg);
+}
+
+/* Hide default checkbox */
+/* Hide default checkbox */
+.addon-checkbox {
+    display: none;
+}
+
+/* Make the entire label clickable */
+.addon-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f9f9f9;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, border 0.3s ease;
+}
+
+/* Ensure images and text remain inside the label */
+.addon-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+/* Image styles */
+.addon-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Addon details */
+.addon-details {
+    flex: 1;
+}
+
+/* Pricing styles */
+.addon-pricing {
+    font-size: 14px;
+}
+
+/* Add hover effect */
+.addon-item:hover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Outer glow effect when checkbox is checked */
+.addon-checkbox:checked + .addon-content {
+    box-shadow: 0 0 10px 3px #006312;
+    border-radius: 8px;
+}
+
+
+</style>
+{% endblock %}

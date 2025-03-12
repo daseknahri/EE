@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}  
+{% block title %}Collection de bijoux - AMSA{% endblock %}
+{% block content %}
+<div id="pr">
+    <!-- Page Title -->
+    <div class="title_one">
+        <h1 class="headline_one">Collection de bijoux</h1>
+    </div>
+
+    <!-- Category Filter Section -->
+    <div class="category-filter">
+        <ul>
+            <li><a href="{% url 'product_list' %}" class="{% if not request.GET.category %}active{% endif %}">Tous</a></li>
+            {% for category in categories %}
+                <li>
+                    <a href="{% url 'product_list' %}?category={{ category.id }}" 
+                    class="{% if request.GET.category == category.id|stringformat:"s" %}active{% endif %}">
+                    {{ category.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid">
+        {% for product in products %}
+            <!-- Product Box -->
+            <div class="product-box">
+                <!-- img-container -->
+                <div class="p-img-container">
+                    <div class="p-img">
+                        <a href="{% url 'product_detail' product.pk %}">
+                        <img
+                            src="{{ product.images.first.image.url }}"
+                            class="p-img-front"
+                            alt="front"
+                        />
+                        <img src="{{ product.images.last.image.url }}" class="p-img-back" alt="back" />
+                        </a>
+                    </div>
+                </div>
+                <!-- Text -->
+                <div class="p-box-text">
+                <!-- category -->
+                    <div class="product-category">
+                        <span>{{ product.category.name }}</span>
+                    </div>
+                    <!-- Title -->
+                    <a href="{% url 'product_detail' product.pk %}" class="product-title"> {{ product.name }} </a>
+                    
+                    <div class="price-buy">
+                        <span class="p-price">{{ product.price }} DH</span>
+                        <a href="#" class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Ajouter au panier</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="no-products">Aucun produit trouvé.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

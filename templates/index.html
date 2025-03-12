@@ -1,0 +1,154 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home - AMSA{% endblock %}
+{% block content %}
+<!-- ================================================= Hero Slider ==============================================-->
+    <div class="container">
+          <!-- Slider main container -->
+          <div class="swiper">
+              <!-- Additional required wrapper -->
+              <div class="swiper-wrapper">
+                  <!-- Slide 1 -->
+                  <div class="swiper-slide">
+                      <div class="slide-content">
+                          <img src="{% static 'images/i1.jpg' %}" alt="Image 1" />
+                          <div class="slide-overlay">
+                              <h2>Découvrez Notre Collection</h2>
+                              <p>Explorez nos dernières nouveautés avec des offres exclusives.</p>
+                              <a href="{% url 'product_list' %}" class="btn">Achetez Maintenant</a>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Slide 2 -->
+                  <div class="swiper-slide">
+                      <div class="slide-content">
+                          <img src="{% static 'images/i2.webp' %}" alt="Image 2" />
+                          <div class="slide-overlay">
+                              <h2>Édition Limitée</h2>
+                              <p>Ne manquez pas nos offres spéciales en édition limitée.</p>
+                              <a href="{% url 'product_list' %}" class="btn">Voir les Offres</a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Pagination -->
+              <div class="swiper-pagination"></div>
+
+              <!-- Navigation Buttons -->
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
+          </div>
+    </div>
+
+    <!-- =================================================== Slider 1 ===============================================-->
+    <section class="p-slider">
+      <!-- heading -->
+      <div class="title_one">
+        <h3 class="headline_one">Trésors intemporels</h3>
+      </div>
+      <!-- Btns -->
+      <div class="slider-btns">
+        <button aria-label="Previous" class="glider-prev">
+          <span></span>
+        </button>
+        <button aria-label="Next" class="glider-next">
+          <span></span>
+        </button>
+      </div>
+      <div class="glider-contain">
+        <div class="glider">
+          {% for product in products %}
+            <!-- 1 -->
+            <!-- Product Box -->
+            <div class="product-box">
+              <!-- img-container -->
+              <div class="p-img-container">
+                <div class="p-img">
+                  <a href="{% url 'product_detail' product.pk %}">
+                    <img
+                      src="{{ product.images.first.image.url }}"
+                      class="p-img-front"
+                      alt="front"
+                    />
+                    <img src="{{ product.images.last.image.url }}" class="p-img-back" alt="back" />
+                  </a>
+                </div>
+              </div>
+              <!-- Text -->
+              <div class="p-box-text">
+                <!-- category -->
+                <div class="product-category">
+                  <span>{{ product.category.name }}</span>
+                </div>
+                <!-- Title -->
+                <a href="{% url 'product_detail' product.pk %}" class="product-title"> {{ product.name }} </a>
+                <!-- Price Buy -->
+                <div class="price-buy">
+                  <span class="p-price">{{ product.price }} DH</span>
+                  <a href="#" class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Ajouter au panier</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+              <!-- Shop Now Button -->
+      <div class="shop-now-container">
+          <a href="{% url 'product_list' %}" class="btn-shop-now">Visiter la boutique</a>
+      </div>
+    </section>
+    <!-- ==================================================== (Grid) ================================================-->
+    <div class="category-section">
+      <h3 class="headline_one">Acheter par catégorie</h3>
+      <div class="grid">
+          {% for category in categories %}
+          <div class="column">
+              <a href="{% url 'product_list' %}?category={{ category.id }}">
+                  <div class="category-card">
+                      <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                      <div class="category-name">{{ category.name }}</div>
+                  </div>
+              </a>
+          </div>
+          {% endfor %}
+      </div>
+  </div>
+    <!-- ==================================================== Poster-6 ==============================================-->
+    <div class="title_one">
+      <h3 class="headline_one">L'amour Est Dans L'Air</h3>
+    </div>
+    <div class="container-gallery">
+      <div class="gallery">
+        <a href="{% static 'images/gg1.jpg' %}" data-lightbox="models" data-title="Necklace">
+          <img src="{% static 'images/gg1.jpg' %}" alt="" />
+        </a>
+        <a href="{% static 'images/gg2.webp' %}" data-lightbox="models" data-title="Necklace Set">
+          <img src="{% static 'images/gg2.webp' %}" alt="" />
+        </a>
+        <a href="{% static 'images/gg3.webp' %}" data-lightbox="models" data-title="Necklace">
+          <img src="{% static 'images/gg3.webp' %}" alt="" />
+        </a>
+        <a href="{% static 'images/gg4.jpg' %}" data-lightbox="models" data-title="Necklace">
+          <img src="{% static 'images/gg4.jpg' %}" alt="" />
+        </a>
+        <a href="{% static 'images/gg5.webp' %}" data-lightbox="models" data-title="Necklace">
+          <img src="{% static 'images/gg5.webp' %}" alt="" />
+        </a>
+        <a href="{% static 'images/gg6.webp' %}" data-lightbox="models" data-title="Bangles">
+          <img src="{% static 'images/gg6.webp' %}" alt="" />
+        </a>
+      </div>
+    </div>
+    <!-- ===================================================== Video ================================================-->
+    <div class="title_one">
+      <h3 class="headline_one">Le glamour en mouvement</h3>
+    </div>
+    <div class="video">
+      <video autoplay loop muted plays-inline class="back-video">
+        <source src="{% static 'images/vi.mp4' %}" type="video/mp4" />
+      </video>
+    </div>
+{% endblock %}

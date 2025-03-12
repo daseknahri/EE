@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Commande réussie - AMSA{% endblock %}
+{% block content %}
+
+<div class="success-container" id="pr">
+    <div class="success-icon">✅</div>
+    <h1 class="success-title">Merci!</h1>
+    <p class="success-message">Votre commande a été passée avec succès. 🎉</p>
+    <a href="{% url 'product_list' %}" class="btn btn-primary">Retour à la boutique</a>
+</div>
+
+{% endblock %}

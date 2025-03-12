@@ -1,0 +1,63 @@
+{% load static %}
+<footer>
+    <div class="container" style="margin-top: 20px; background-color: black;">
+      <div class="sec">
+        <h2>À propos de nous</h2>
+        <p>
+          Bienvenue chez AMSA BIJOUTERIE Boutique, où nous façonnons l'élégance et la beauté dans chaque pièce de bijou. 
+          Avec une passion pour des designs exquis et un savoir-faire incomparable, nous embellissons le monde avec des trésors intemporels depuis plus de 10 ans. 
+          Notre parcours reflète notre dévouement à l'art, à la qualité et à la sophistication. 
+          Explorez notre collection et découvrez des bijoux qui racontent des histoires, créent des souvenirs et célèbrent votre style unique.
+        </p>
+        <ul class="sci">
+          <li>
+            <a href="https://www.instagram.com/adeshdatir_99/"><i class="fa-brands fa-instagram"></i></a>
+          </li>
+          <li>
+            <a href="https://twitter.com/adeshdatir"><i class="fa-brands fa-twitter"></i></a>
+          </li>
+          <li>
+            <a href="https://www.facebook.com/adesh.datir.99/"><i class="fa-brands fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="https://www.youtube.com/channel/UCY2yJpYNDkmM-ivvlpEtsSg/videos"><i class="fa-brands fa-youtube"></i></a>
+          </li>
+        </ul>
+      </div>
+      <div class="sec quicklinks">
+        <h2>Boutique</h2>
+        <ul>
+          <li><a href="{% url 'product_list' %}">All Jewellery</a></li>
+          {% for category in categories %}
+            <li><a href="{% url 'product_list' %}?category={{ category.id }}">{{ category.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="sec contact">
+        <h2>Contactez-nous</h2>
+        <ul class="info">
+          <li>
+            <span><i class="fa-solid fa-phone"></i></span>
+            <p><a href="tel: +919881852058">+212618201196</a></p>
+          </li>
+          <li>
+            <span><i class="fa-solid fa-envelope"></i></span>
+            <p>
+              <a href="mailto: adeshdatir99@gmail.com"
+                >contact@amsa.com</a
+              >
+            </p>
+          </li>
+        </ul>
+      </div>
+    </div>
+</footer>
+<div class="copyrightText">
+    <p>Copyright 2025. All Rights Reserved.</p>
+</div>
+<!-- WhatsApp -->
+<div class="whatsapp_float">
+    <a href="https://wa.me/+212618201196">
+        <img src="{% static 'images/whatsapp.webp' %}" alt="" />
+    </a>
+</div>

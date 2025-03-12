@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Shopping Cart - SiyaRam{% endblock %}
+{% block content %}
+
+<div id="pr">
+    <div class="cart-container">
+        <h1 class="cart-title">🛒 Your Shopping Cart</h1>
+
+        {% if cart %}
+            <div class="cart-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <div class="cart-container">
+                            <h1>Your Shopping Cart</h1>
+                            {% for item in cart.items.all %}
+                                <div class="cart-item">
+                                    <p>{{ item.product.name }} - Quantity: {{ item.quantity }} - Price: ${{ item.product.price }}</p>
+                                    {% if item.main_product %}
+                                        <p><strong>Main Product</strong></p>
+                                    {% else %}
+                                        <p><em>Addon</em> - Discounted Price: ${{ item.product.price }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>                        
+                        {% for item in cart %}
+                            <tr data-product-id="{{ item.product.id }}">
+                                <td>{{ item.product.name }}</td>
+                                <td>${{ item.price }}</td>
+                                <td>
+                                    <div class="quantity-control">
+                                        <button class="btn-quantity decrease" data-product-id="{{ item.product.id }}">-</button>
+                                        <span class="quantity">{{ item.quantity }}</span>
+                                        <button class="btn-quantity increase" data-product-id="{{ item.product.id }}">+</button>
+                                    </div>
+                                </td>
+                                <td class="total-price">${{ item.total_price }}</td>
+                                <td>
+                                    <a href="{% url 'cart_remove' item.product.id %}" class="btn btn-danger">Remove</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cart-summary">
+                <h3>Total: <span class="cart-total">${{ cart.get_total_price }}</span></h3>
+                <h2>Checkout</h2>
+                <form method="post" action="{% url 'checkout' %}" class="checkout-form">
+                    {% csrf_token %}
+                    <input type="text" name="name" placeholder="Full Name" required>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="text" name="phone" placeholder="Phone Number" required>
+                    <textarea name="address" placeholder="Delivery Address" required></textarea>
+                    <button type="submit" class="btn btn-primary">Place Order</button>
+                </form>
+                <a href="{% url 'product_list' %}" class="btn btn-secondary">Continue Shopping</a>
+            </div>
+        {% else %}
+            <div class="cart-empty">
+                <p>Your cart is empty. 😢</p>
+                <a href="{% url 'product_list' %}" class="btn btn-primary">Shop Now</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock %}
