@@ -2,27 +2,54 @@
 {% load static %}
 {% block title %}{{ product.name }} - SiyaRam{% endblock %}
 {% block content %}
+{% load custom_filters %}
 <div id="pr">
     <div class="product-detail-container">
-        <!-- Image Section -->
         <div class="image-section">
-            <img id="main-image" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-    
-            <!-- Thumbnails Below Main Image -->
-            <div class="product-gallery">
-                {% for image in product.images.all %}
-                    <img class="gallery-image" src="{{ image.image.url }}" alt="{{ product.name }}" data-large="{{ image.image.url }}">
-                {% endfor %}
+            <!-- Main Media Display (Image or Video) -->
+            <div class="main-media-wrapper">
+                {% if product.video %}
+                    <video id="main-media" controls>
+                        <source src="{{ product.video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                {% else %}
+                    <img id="main-media" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+                {% endif %}
+            </div>
+        
+            <!-- Scrollable Thumbnails Below -->
+            <div class="gallery-container">
+                <div class="product-gallery">
+                    {% if product.video %}
+                        <div class="gallery-item">
+                            <img class="gallery-image" 
+                                src="{{ product.video_thumbnail.url|default:'/static/video-icon.png' }}" 
+                                alt="Product Video" 
+                                data-video="{{ product.video.url }}">
+                        </div>
+                    {% endif %}
+        
+                    {% for image in product.images.all %}
+                        <div class="gallery-item">
+                            <img class="gallery-image" src="{{ image.image.url }}" alt="{{ product.name }}" data-large="{{ image.image.url }}">
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
+        
+        
+        
+                     
     
         <!-- Product Information Section -->
         <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            <p><strong>Catégorie:</strong> {{ product.category.name }}</p>
+            <p class="product-price"><strong>Prix:</strong> {{ product.price }} MAD</p>
+            <p class="product-description">{{ product.description }}</p>
             <div class="product-cart-style">
-                <h1>{{ product.name }}</h1>
-                <p><strong>Catégorie:</strong> {{ product.category.name }}</p>
-                <p class="product-price"><strong>Prix:</strong> {{ product.price }} MAD</p>
-                <p class="product-description">{{ product.description }}</p>
             
         
                 <!-- Addons Section -->
@@ -48,44 +75,73 @@
                         </div>
                     </div>
                 {% endif %}
-            </div>
-            <!-- Shipping Section -->
-            <div class="shipping-section">
-                <h3>Sélectionner la livraison</h3>
-                <div class="shipping-options">
-                    <label>
-                        <input type="radio" name="shipping" value="10" id="inside-tanger"> Dans Tanger (10 MAD)
-                    </label>
-                    <label>
-                        <input type="radio" name="shipping" value="30" id="outside-tanger"> Hors de Tanger (30 MAD)
-                    </label>
-                </div>
-            </div>
-    
-            <!-- Price & Shipping Section (Invoice Style) -->
-            <div class="price-shipping-section">
-                <div class="price-info">
-                    <div class="invoice-row">
-                        <span>Prix du produit</span><span><span id="total-price">{{ product.price }}</span>MAD</span>
-                    </div>
-                    <div class="invoice-row">
-                        <span>Frais de livraison</span><span id="shipping-fee">10 MAD</span>
-                    </div>
-                    {% if product.addons.all %}
-                    <div class="invoice-row">
-                        <span><strong>Addon sélectionnés:</strong></span>
-                        <ul id="addons-list"></ul>
-                    </div>
-                    {% endif %}
-                    <div class="invoice-row final">
-                        <span><strong>Prix final</strong></span><span><strong><span id="final-price">{{ product.price }}</span>MAD</strong></span>
+                
+                <!-- Shipping Section
+                <div class="shipping-section">
+                    <h3>Sélectionner la livraison</h3>
+                    <div class="shipping-options">
+                        <label>
+                            <input type="radio" name="shipping" value="10" id="inside-tanger"> Dans Tanger (10 MAD)
+                        </label>
+                        <label>
+                            <input type="radio" name="shipping" value="30" id="outside-tanger"> Hors de Tanger (30 MAD)
+                        </label>
                     </div>
                 </div>
-            </div>
-    
-            <!-- Button Section -->
-            <div class="order-button-container">
-                <button id="open-modal-btn" class="btn-place-order">Passer la commande</button>
+                    -->
+                <!-- Price & Shipping Section (Invoice Style) -->
+                <div class="price-shipping-section">
+                    <div class="price-info">
+                        <div class="invoice-row">
+                            <span>Prix du produit</span><span><span id="total-price">{{ product.price }}</span>MAD</span>
+                        </div>
+                        <div class="invoice-row">
+                            <span>Frais de livraison</span><span id="shipping-fee">Gratuite</span>
+                        </div>
+                        {% if product.addons.all %}
+                        <div class="addons-container">
+                            <div class="addons-title-box">
+                                <span class="addons-title"><strong>Addon sélectionnés</strong></span>
+                            </div>
+                            <ul id="addons-list" class="addons-list"></ul>
+                        </div>
+                        {% endif %}
+                        <div class="invoice-row final">
+                            <span><strong>Prix final</strong></span><span><strong><span id="final-price">{{ product.price }}</span>MAD</strong></span>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="order-button-container">
+                    <form method="post" action="{% url 'checkout' %}" class="checkout-form" id="checkout-form">
+                        {% csrf_token %}
+                        <h3>Place Your Order</h3>
+                        
+                        <input type="text" name="name" placeholder="Nom Complet 👨‍💼 (الإسم الكامل)" id="namo" style="background-image: url('../static/ico.svg');">
+                        <input type="text" name="phone" placeholder="Téléphone  📞  (الهاتف)" id="namo" style="background-image: url('../static/ico1.svg');" required>
+                        <input type="text" name="address" placeholder="Adresse  📍  (العنوان الكامل)" style="background-image: url('../static/ico2.svg');" id="namo">
+                        
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        
+                        <!-- Addons as Hidden Input (Sent with the form) -->
+                        <input type="hidden" name="addons" id="addons-input">
+                        <!-- Offer Selection -->
+                        <div class="p-checkbox-container">
+                            <label class="p-label">
+                                <input type="checkbox" name="offer" value="50" id="offer-checkbox" class="p-checkbox">
+                                <span class="p-text">Prendre le 2ème produit à 50% de réduction</span>
+                                <span class="p-info">
+                                    <span class="o-price">{{ product.price }} MAD</span> 
+                                    <span class="d-price">{{ product.price|divide:2 }} MAD</span>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        
+                        <!-- Place Order Button -->
+                        <button type="submit" class="btn-place-order">Passer la commande</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -161,35 +217,33 @@
         </div>
     </div>
 </div>
-<div id="order-modal" class="modal">
-    <div class="modal-content">
-        <span id="close-modal-btn" class="close-btn">&times;</span>
-        <form method="post" action="{% url 'checkout' %}" class="checkout-form">
-            {% csrf_token %}
-            <h3>Place Your Order</h3>
-            <input type="text" name="name" placeholder="Full Name" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="text" name="phone" placeholder="Phone Number" required>
-            <textarea name="address" placeholder="Delivery Address" required></textarea>
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-            
-            <!-- Addons as Hidden Input (Sent with the form) -->
-            <input type="hidden" name="addons" id="addons-input">
-            
-            <button type="submit" class="btn btn-primary">Place Order</button>
-        </form>
-    </div>
-</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        const offerCheckbox  = document.getElementById('offer-checkbox');
         const faqItems = document.querySelectorAll(".faq-item");
         const addonCheckboxes = document.querySelectorAll(".addon-checkbox");
-        const shippingRadios = document.querySelectorAll("input[name='shipping']");
+        //const shippingRadios = document.querySelectorAll("input[name='shipping']");
         const totalPriceElement = document.getElementById("total-price");
         const finalPriceElement = document.getElementById("final-price");
-        const shippingFeeElement = document.getElementById("shipping-fee");
+        //const shippingFeeElement = document.getElementById("shipping-fee");
         const addonsListElement = document.getElementById("addons-list");
+        const addonsInput = document.getElementById("addons-input");
+        const form = document.querySelector(".checkout-form");
         const basePrice = parseFloat(totalPriceElement.innerText.replace('MAD', ''));
+        offerCheckbox.addEventListener("change", function() {
+            // Recalculate price based on selected offer
+            let totalPrice = parseFloat(finalPriceElement.innerText.replace('MAD', ''));
+
+            if (offerCheckbox.checked) {
+                totalPrice = totalPrice + (totalPrice / 2);  // Apply 50% off for the second product
+            } else {
+                totalPrice = totalPrice - (totalPrice / 3);  // Remove the discount if checkbox is unchecked
+            }
+
+            // Update the final price display
+            finalPriceElement.innerText = totalPrice.toFixed(2);
+        });
         faqItems.forEach((item) => {
             const question = item.querySelector(".faq-question");
             const answer = item.querySelector(".faq-answer");
@@ -214,17 +268,18 @@
                 }
             });
         });
-        let shippingFee = 20;
+        //let shippingFee = 20;
         let selectedAddons = [];
             // Shipping Fee Calculation
-        shippingRadios.forEach(radio => {
-            radio.addEventListener("change", function() {
-                shippingFee = parseFloat(this.value);
-                updateTotalPrice();
-            });
-        });
+        //shippingRadios.forEach(radio => {
+        //    radio.addEventListener("change", function() {
+        //        shippingFee = parseFloat(this.value);
+        //        updateTotalPrice();
+        //    });
+        //});
 
     // Addon Selection
+
         addonCheckboxes.forEach(checkbox => {
             checkbox.addEventListener("change", function() {
                 const addonName = this.dataset.addonName;
@@ -242,77 +297,119 @@
         });
             // Update Addon List
         function updateAddonList() {
-            addonsListElement.innerHTML = '';
+
+            addonsListElement.innerHTML = "";
+
+            // Populate the list with selected addons
             selectedAddons.forEach(addon => {
                 const listItem = document.createElement("li");
-                listItem.textContent = `${addon.name}: ${addon.price / 2} MAD`;
+
+                // Structure: Name and Price in Two Sections
+                listItem.innerHTML = `
+                    <span class="addon-name">${addon.name}</span>
+                    <span class="addon-price">${(addon.price / 2).toFixed(2)} MAD</span>
+                `;
+
                 addonsListElement.appendChild(listItem);
             });
+            let selectedAddonsid = [];
+            addonCheckboxes.forEach(function (checkbox) {
+                if (checkbox.checked) {
+                    selectedAddonsid.push(checkbox.dataset.addonId);
+                }
+            });
+
+            // Set the selected addons in the hidden input
+            addonsInput.value = selectedAddonsid.join(',');
         }
 
         // Update Total Price
         function updateTotalPrice() {
             const addonTotal = selectedAddons.reduce((total, addon) => total + addon.price / 2, 0);
-            const total = basePrice + addonTotal + shippingFee;
+            const total = basePrice + addonTotal;
 
-            totalPriceElement.innerText = basePrice + addonTotal;
-            shippingFeeElement.innerText = `${shippingFee} MAD`;
+            //shippingFeeElement.innerText = `${shippingFee} MAD`;
             finalPriceElement.innerText = total.toFixed(2);
         }
         updateTotalPrice();
-        const buyNowButton = document.getElementById("open-modal-btn");
-        const addonsInput = document.getElementById("addons-input");
-        const orderModal = document.getElementById("order-modal");
-        const closeModalBtn = document.getElementById("close-modal-btn");
 
-        buyNowButton.addEventListener("click", function () {
-            orderModal.style.display = "block";
-            
-            // Collect the selected addon IDs
-            let selectedAddons = [];
-            addonCheckboxes.forEach(function (checkbox) {
-                if (checkbox.checked) {
-                    selectedAddons.push(checkbox.dataset.addonId);
+        // Select all gallery images and main media (image or video)
+        const galleryItems = document.querySelectorAll(".gallery-image");
+        let mainMedia = document.getElementById("main-media");
+
+        galleryItems.forEach(item => {
+            item.addEventListener("click", function () {
+                const videoUrl = this.getAttribute("data-video");
+                const imageUrl = this.getAttribute("data-large");
+
+                let newMedia;
+
+                if (videoUrl) {
+                    // Create a new video element
+                    newMedia = document.createElement("video");
+                    newMedia.id = "main-media";
+                    newMedia.controls = true;
+                    newMedia.autoplay = true;
+                    newMedia.loop = true;
+                    newMedia.style.width = "100%"; // Ensure video fills the container
+                    newMedia.style.height = "auto"; // Maintain aspect ratio
+                    newMedia.style.display = "block"; // Ensure visibility
+                    newMedia.style.objectFit = "cover"; // Ensure it fits within the frame
+
+                    // Create and append the source element
+                    const source = document.createElement("source");
+                    source.src = videoUrl;
+                    source.type = "video/mp4";
+
+                    newMedia.appendChild(source);
+                } else if (imageUrl) {
+                    // Create a new image element
+                    newMedia = document.createElement("img");
+                    newMedia.id = "main-media";
+                    newMedia.src = imageUrl;
+                    newMedia.alt = "Product Image";
+                    newMedia.style.width = "100%"; // Ensure image fills container
+                    newMedia.style.height = "auto";
+                    newMedia.style.display = "block"; // Ensure visibility
+                }
+
+                // Replace the existing main media with the new one
+                if (newMedia) {
+                    mainMedia.parentNode.replaceChild(newMedia, mainMedia);
+                    mainMedia = newMedia; // Update reference to new media
                 }
             });
-
-            // Set the selected addons in the hidden input
-            addonsInput.value = selectedAddons.join(',');
         });
 
-        // Close the modal when the close button is clicked
-        closeModalBtn.addEventListener("click", function () {
-            orderModal.style.display = "none";
-        });
-
-        // Close the modal if the user clicks outside of it
-        window.addEventListener("click", function(event) {
-            if (event.target == orderModal) {
-                orderModal.style.display = "none";
-            }
-        });
-        // Select all small images and main image
-        const galleryImages = document.querySelectorAll(".gallery-image");
-        const mainImage = document.getElementById("main-image");
-
-        // Add click event to each gallery image
-        galleryImages.forEach(image => {
-            image.addEventListener("click", function () {
-                // Get the clicked image's URL and set it as the main image's source
-                const largeImageUrl = this.getAttribute("data-large");
-                mainImage.src = largeImageUrl;
-            });
-        });
     });
 </script>
 
 <style>
 /* General Styles */
+#namo {
+    background-repeat: no-repeat;
+    background-position: left center; /* Position the image on the left side */
+    background-size: 39px 39px; /* Size the icon to fit within the input box */
+    padding-left: 60px; /* Add padding to the left so the text doesn't overlap with the icon */
+    padding-right: 10px; /* Optional: add some space on the right for text */
+    font-size: 16px; /* Adjust font size for better readability */
+    border: 1px solid #ddd; /* Border for the input field */
+    border-radius: 4px; /* Rounded corners */
+    height: 40px; /* Set height for better alignment */
+    width: 100%; /* Make the input take the full width of its container */
+}
+
+/* Optional: If you want the input to be focused with a different border color */
+#namo:focus {
+    border-color: #007bff; /* Change border color on focus */
+    outline: none; /* Remove the default outline */
+}
+
 .shipping-section, .price-shipping-section, .order-button-container {
     width: 100%;
     max-width: 400px;
-    margin: 20px auto;
-    padding: 15px;
+    margin: 5px auto;
+    padding: 5px;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
@@ -323,7 +420,7 @@
     font-size: 18px;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: #333;
 }
 
@@ -337,7 +434,7 @@
     display: flex;
     align-items: center;
     background: #f7f7f7;
-    padding: 10px;
+    padding: 5px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 16px;
@@ -355,16 +452,19 @@
 
 /* Price & Shipping Section */
 .price-shipping-section {
-    padding: 20px;
     background: #f9f9f9;
 }
 
 .invoice-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
     font-size: 16px;
     border-bottom: 1px solid #ddd;
+    background: #f8f9fa; /* Light gray background */
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 6px;
+    border: 1px solid #ddd;
 }
 
 .invoice-row span {
@@ -376,14 +476,53 @@
     font-weight: 700;
     color: #222;
 }
-
-/* Selected Addons List */
-#addons-list {
-    padding-left: 20px;
+.addons-container {
+    padding: 10px;
+    margin-top: 3px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f8f9fa; /* Light background for better visibility */
+}
+.addons-title-box {
+    text-align: center;
+    background: #e9ecef;
+    padding: 6px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+}
+.addons-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    display: block;
+}
+.addons-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+/* Each Addon Item */
+.addons-list li {
+    background: #fff;
+    padding: 10px 6px;
+    border-bottom: 1px solid #ddd;
     font-size: 14px;
-    color: #444;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Full width */
+}
+.addons-list li:last-child {
+    border-bottom: none;
 }
 
+/* Hover Effect */
+.addons-list li:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    color: #007bff;
+}
 /* Order Button */
 .order-button-container {
     text-align: center;
@@ -446,6 +585,17 @@
         align-items: center;
         gap: 25px;
     }
+    .addons-container {
+        padding: px;
+    }
+
+    .addons-title {
+        font-size: 13px;
+        margin-left: 10px;
+    }
+
+
+
 }
 /* FAQ Section Styling */
 .faq-section {
@@ -570,6 +720,207 @@
     box-shadow: 0 0 10px 3px #006312;
     border-radius: 8px;
 }
+/* Ensure the main media (image or video) has a fixed size */
+/* Main media container */
+.main-media-wrapper {
+    width: 500px; /* Fixed width */
+    height: 500px; /* Fixed height */
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ensures video and images have the same dimensions */
+#main-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Make sure it fills the box */
+    border-radius: 8px;
+    background-color: #000;
+}
+
+/* Force video to match the same size as images */
+video#main-media {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block;
+    background-color: black;
+}
+
+/* Ensure container keeps a fixed size when switching media */
+.main-media-wrapper video, 
+.main-media-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    .main-media-wrapper {
+        width: 100%;
+        max-height: 350px;
+    }
+
+    /* Keep images and videos the same height on mobile */
+    #main-media {
+        width: 100%;
+        height: 350px;
+    }
+
+    video#main-media {
+        height: 350px !important;
+    }
+
+    .gallery-item {
+        width: 60px;
+        height: 60px;
+    }
+    .gallery-container {
+        padding-left: 40px;
+    }
+}
+
+/* Scrollable thumbnails */
+.gallery-container {
+    width: 100%;
+    overflow-x: auto; /* Allows horizontal scrolling */
+    white-space: nowrap; /* Prevents items from wrapping */
+    margin-top: 10px;
+}
+
+/* Thumbnails remain in a single row */
+.product-gallery {
+    display: flex;
+    gap: 10px;
+    flex-wrap: nowrap; /* Prevents jumping to a new line */
+}
+
+/* Each thumbnail */
+.gallery-item {
+    cursor: pointer;
+    width: 80px;
+    height: 80px;
+    flex: 0 0 auto;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8f8f8;
+    border-radius: 8px;
+}
+
+/* Thumbnails */
+.gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Hover effect */
+.gallery-image:hover {
+    border-color: #007bff;
+    transform: scale(1.05);
+}
+
+/* Ensure thumbnails for videos and images look identical */
+.gallery-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+/* Container for the checkbox */
+.p-checkbox-container {
+    margin: 15px 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Label for the checkbox */
+.p-label {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    padding: 10px;
+    border: 2px solid #ddd; /* Default border */
+    border-radius: 8px;
+    transition: border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* Checkbox input */
+.p-checkbox {
+    appearance: none;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    margin-right: 10px;
+    transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    position: relative;
+}
+
+/* When the checkbox is checked */
+.p-checkbox:checked {
+    background-color: #28a745; /* Green background */
+    border-color: #28a745; /* Green border */
+}
+
+/* Checkbox checkmark effect */
+.p-checkbox:checked::before {
+    content: '✔';
+    position: absolute;
+    top: 0;
+    left: 4px;
+    color: white;
+    font-size: 14px;
+}
+
+/* When hovering over the label */
+.p-label:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* When the checkbox is focused (keyboard navigation) */
+.p-checkbox:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Green glow effect */
+}
+
+/* Promotion text */
+.p-text {
+    font-size: 14px;
+    color: #333;
+    margin-right: 10px;
+    font-weight: normal;
+}
+
+/* Price info container */
+.p-info {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Original price */
+.o-price {
+    text-decoration: line-through;
+    color: #888;
+}
+
+/* Discounted price */
+.d-price {
+    color: #28a745;
+    font-weight: bold;
+}
+
 
 
 </style>

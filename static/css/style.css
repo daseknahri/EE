@@ -11,17 +11,6 @@ body, html {
   overflow-x: hidden;
 }
 
-.navbar {
-  position: relative; /* Default positioning (or simply remove this line) */
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: white; /* Ensure visibility */
-  padding: 0px 0px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000; /* Keep navbar on top if needed, but it won't stay fixed anymore */
-}
-
 nav {
   background-color: white;
   box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
@@ -50,10 +39,10 @@ nav a {
   text-decoration: none;
   display: flex;
   align-items: center;
-  color: rgb(218, 165, 32);
+  color: #daa520;
 }
 nav a:hover {
-  color: rgb(235, 42, 84);
+  color: #ff6600;
 }
 nav li:first-child {
   margin-right: auto;

@@ -16,6 +16,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
     addons = models.ManyToManyField('self', symmetrical=False, related_name='addon_for', blank=True)
+    video = models.FileField(upload_to='product_videos/', blank=True, null=True)  # Added video field
 
 
 

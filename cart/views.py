@@ -126,6 +126,11 @@ def cart_remove(request, product_id):
     return JsonResponse({"success": True})
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product, Order, OrderItem
+from .forms import OrderForm
+from .cart import Cart
+
 def checkout(request):
     cart = Cart(request)
     if request.method == 'POST':
@@ -135,33 +140,56 @@ def checkout(request):
 
             # If coming from Buy Now, only add that product to the order
             product_id = request.POST.get("product_id")
-            if product_id:
-                product = get_object_or_404(Product, id=product_id)
+            offer = request.POST.get("offer")
+            try:
+                if product_id:
+                    product = get_object_or_404(Product, id=product_id)
 
-                # Calculate total price (base product + addons)
-                total_price = product.price
-                addon_ids = request.POST.get('addons', '').split(',')
-                addons = Product.objects.filter(id__in=addon_ids)
-                for addon in addons:
-                    total_price += addon.price / 2  # Add addon at half price
+                    # Calculate total price (base product + addons)
+                    total_price = product.price
+                    addon_ids = request.POST.get('addons', '').split(',')
+                    addons = Product.objects.filter(id__in=addon_ids)
+                    for addon in addons:
+                        total_price += addon.price / 2  # Add addon at half price
+                    # Apply offer (50% off for second product)
+                    if offer == '50':
+                        # Apply 50% off to the second product (Example: Apply it to the next item in cart)
+                        total_price += product.price * 0.50
 
-                order.total_price = total_price
-                order.save()
+                    order.total_price = total_price
+                    order.save()
+                    OrderItem.objects.create(order=order, product=product, quantity=1, price=product.price)
+                    if offer:
+                        OrderItem.objects.create(order=order, product=product, quantity=1, price=product.price /2)
+                    # Add main product and addons to OrderItem table
+                    for addon in addons:
+                        OrderItem.objects.create(order=order, product=addon, quantity=1, price=addon.price / 2)
 
-                # Add main product and addons to OrderItem table
-                OrderItem.objects.create(order=order, product=product, quantity=1, price = product.price)
-                for addon in addons:
-                    OrderItem.objects.create(order=order, product=addon, quantity=1, price = addon.price / 2)
-            else:
-                order.total_price = cart.get_total_price()
-                order.save()
-                for item in cart:
-                    OrderItem.objects.create(order=order, product=item['product'], quantity=item['quantity'], price=item['price'] )
-                cart.clear()
-            
-            return redirect('order_success')
+                else:
+                    # Checkout from cart
+                    order.total_price = cart.get_total_price()
+                    order.save()
 
+                    # Create OrderItems for each cart item
+                    for item in cart:
+                        OrderItem.objects.create(order=order, product=item['product'], quantity=item['quantity'], price=item['price'])
+
+                    # Clear the cart after successful order
+                    cart.clear()
+
+                return redirect('order_success')
+
+            except Exception as e:
+                # Add logging or send error response if something goes wrong
+                return redirect('cart_detail')
+
+        else:
+            # If form is not valid, redirect back to the cart or show an error message
+            return redirect('cart_detail')
+
+    # If method is not POST, redirect to cart
     return redirect('cart_detail')
+
 
 
 def order_success(request):

@@ -16,7 +16,7 @@ class OrderItemInline(admin.TabularInline):
 
 class OrderAdmin(admin.ModelAdmin):
     """Customize Order display in admin."""
-    list_display = ("id", "name", "email", "phone", "total_price", "created_at")
+    list_display = ("id", "name", "phone", "total_price", "created_at")
     list_filter = ("created_at",)
     search_fields = ("name", "email", "phone")
     readonly_fields = ("total_price", "created_at")

@@ -1,4 +1,5 @@
 {% load static %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,16 +8,20 @@
     <title>{% block title %}AMSA - Achetez les meilleurs bijoux{% endblock %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/lo.png' %}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="{% static 'lightbox.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/Slider.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    {% compress css %}
+        <link rel="stylesheet" href="{% static 'lightbox.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/Slider.min.css' %}"/>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+        <link rel="stylesheet" href="{% static 'style.css' %}" />
+    {% endcompress %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glider-js/glider.min.css">
     <!-- Glider.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/glider-js/glider.min.js"></script>
 </head>
 <body>
-
+    <div class="free-delivery-bar">
+        🎉 Profitez de la livraison gratuite sur toutes les commandes ! 🎉
+    </div>
     <div id="cart-sidebar">
         <div class="cart-header">
             <h3>Votre panier</h3>
@@ -25,7 +30,6 @@
     
         <div class="cart-content">
             <div class="cart-items" id="cart-sidebar-body">
-                
             </div>
         </div>
     
@@ -33,10 +37,9 @@
             <h4>Total: <span class="cart-total">0 MAD</span></h4>
             <form method="post" action="{% url 'checkout' %}" class="checkout-form">
                 {% csrf_token %}
-                <input type="text" name="name" placeholder="Full Name" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="text" name="phone" placeholder="Phone Number" required>
-                <textarea name="address" placeholder="Delivery Address" required></textarea>
+                <input type="text" name="name" placeholder="Nom complet" required>
+                <input type="text" name="phone" placeholder="Numéro de téléphone" required>
+                <textarea name="address" placeholder="Adresse de livraison" required></textarea>
                 <button type="submit" class="btn btn-primary">Passer la commande</button>
             </form>
         </div>
@@ -53,13 +56,14 @@
     {% include 'partials/footer.html' %}  <!-- Include Footer -->
 
     <!-- Scripts -->
-    <script src="{% static 'js/Slider.min.js' %}"></script>
     <script src="https://kit.fontawesome.com/8c8aa2002d.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="{% static 'lightbox-plus-jquery.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="{% static 'js/cart.js' %}"></script>
-
+    {% compress js %}
+        <script src="{% static 'js/Slider.min.js' %}"></script>
+        <script src="{% static 'js/script.js' %}"></script>
+        <script src="{% static 'js/cart.js' %}"></script>
+    {% endcompress %}
 
 </body>
 </html>
