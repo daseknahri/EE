@@ -1,4 +1,13 @@
 from django.db import models
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+from django.core.exceptions import ValidationError
+
+def validate_video_size(value):
+    limit = 50 * 1024 * 1024  # 50MB limit
+    if value.size > limit:
+        raise ValidationError("Video file is too large. Max size is 50MB.")
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
@@ -7,6 +16,15 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    def save(self, *args, **kwargs):
+        if self.image:
+            img = Image.open(self.image)
+            img = img.convert("RGB")  # Ensure it's in RGB format
+            img.thumbnail((800, 800))  # Resize to a max of 800x800 pixels
+            buffer = BytesIO()
+            img.save(buffer, format="JPEG", quality=70)  # Reduce quality to 70%
+            self.image = ContentFile(buffer.getvalue(), name=self.image.name)
+        super().save(*args, **kwargs)
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
@@ -16,12 +34,22 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
     addons = models.ManyToManyField('self', symmetrical=False, related_name='addon_for', blank=True)
-    video = models.FileField(upload_to='product_videos/', blank=True, null=True)  # Added video field
+    video = models.FileField(upload_to='product_videos/', blank=True, null=True, validators=[validate_video_size])  # Added video field
 
 
 
     def __str__(self):
         return self.name
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)  # Reviewer's name
+    content = models.TextField()  # Review content
+    image = models.ImageField(upload_to='review_images/', blank=True, null=True)  # Reviewer's image
+    created_at = models.DateTimeField(auto_now_add=True)  # Date the review was created
+    
+    def __str__(self):
+        return f'Review by {self.name} on {self.product.name}'
     
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
@@ -30,3 +58,12 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - Image {self.id}"
+    def save(self, *args, **kwargs):
+        if self.image:
+            img = Image.open(self.image)
+            img = img.convert("RGB")  # Ensure it's in RGB format
+            img.thumbnail((800, 800))  # Resize to a max of 800x800 pixels
+            buffer = BytesIO()
+            img.save(buffer, format="JPEG", quality=70)  # Reduce quality to 70%
+            self.image = ContentFile(buffer.getvalue(), name=self.image.name)
+        super().save(*args, **kwargs)

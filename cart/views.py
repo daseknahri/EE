@@ -14,7 +14,7 @@ def cart_summary(request):
     cart_items = [
         {
             "id": int(product_id),  # Convert key to integer
-            "name": Product.objects.get(id=int(product_id)).name,
+            "name": Product.objects.get(id=int(product_id)).category.name,
             "image": Product.objects.get(id=int(product_id)).images.first().image.url,
             "quantity": item["quantity"],
             "total_price": float(item["price"]),
@@ -143,18 +143,20 @@ def checkout(request):
             offer = request.POST.get("offer")
             try:
                 if product_id:
+
                     product = get_object_or_404(Product, id=product_id)
+                    print(product)
 
                     # Calculate total price (base product + addons)
                     total_price = product.price
                     addon_ids = request.POST.get('addons', '').split(',')
-                    addons = Product.objects.filter(id__in=addon_ids)
-                    for addon in addons:
-                        total_price += addon.price / 2  # Add addon at half price
-                    # Apply offer (50% off for second product)
-                    if offer == '50':
-                        # Apply 50% off to the second product (Example: Apply it to the next item in cart)
-                        total_price += product.price * 0.50
+                    print(addon_ids)
+                    if addon_ids != ['']:
+                        addons = Product.objects.filter(id__in=addon_ids)
+                        for addon in addons:
+                            total_price += addon.price / 2  # Add addon at half price
+                    if offer:
+                        total_price += product.price / 2
 
                     order.total_price = total_price
                     order.save()
@@ -162,8 +164,9 @@ def checkout(request):
                     if offer:
                         OrderItem.objects.create(order=order, product=product, quantity=1, price=product.price /2)
                     # Add main product and addons to OrderItem table
-                    for addon in addons:
-                        OrderItem.objects.create(order=order, product=addon, quantity=1, price=addon.price / 2)
+                    if addon_ids != ['']:
+                        for addon in addons:
+                            OrderItem.objects.create(order=order, product=addon, quantity=1, price=addon.price / 2)
 
                 else:
                     # Checkout from cart
@@ -180,10 +183,11 @@ def checkout(request):
                 return redirect('order_success')
 
             except Exception as e:
-                # Add logging or send error response if something goes wrong
+                print('somting wrong',e)
                 return redirect('cart_detail')
 
         else:
+            print('some less wrong')
             # If form is not valid, redirect back to the cart or show an error message
             return redirect('cart_detail')
 

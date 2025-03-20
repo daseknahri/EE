@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Category, ProductImage
+from .models import Product, Category, ProductImage, Review
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -16,6 +16,13 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('category',)
     inlines = [ProductImageInline]
 
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('name', 'product', 'created_at')
+    search_fields = ('name', 'content')
+    list_filter = ('created_at',)
+
+
+admin.site.register(Review, ReviewAdmin)
 
 
 admin.site.register(ProductImage)

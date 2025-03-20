@@ -6,38 +6,41 @@
 <div id="pr">
     <div class="product-detail-container">
         <div class="image-section">
-            <!-- Main Media Display (Image or Video) -->
-            <div class="main-media-wrapper">
-                {% if product.video %}
-                    <video id="main-media" controls>
-                        <source src="{{ product.video.url }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                {% else %}
-                    <img id="main-media" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-                {% endif %}
-            </div>
+            <div class="media-container">
+                <!-- Thumbnails (Vertical on the Left) -->
+                <div class="gallery-container">
+                    <div class="product-gallery">
+                        {% if product.video %}
+                            <div class="gallery-item">
+                                <img class="gallery-image" 
+                                    src="{{ product.video_thumbnail.url|default:'/static/video-icon.png' }}" 
+                                    alt="Product Video" 
+                                    data-video="{{ product.video.url }}">
+                            </div>
+                        {% endif %}
         
-            <!-- Scrollable Thumbnails Below -->
-            <div class="gallery-container">
-                <div class="product-gallery">
+                        {% for image in product.images.all %}
+                            <div class="gallery-item">
+                                <img class="gallery-image" src="{{ image.image.url }}" alt="{{ product.name }}" data-large="{{ image.image.url }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+        
+                <!-- Main Media (Large Image or Video) -->
+                <div class="main-media-wrapper">
                     {% if product.video %}
-                        <div class="gallery-item">
-                            <img class="gallery-image" 
-                                src="{{ product.video_thumbnail.url|default:'/static/video-icon.png' }}" 
-                                alt="Product Video" 
-                                data-video="{{ product.video.url }}">
-                        </div>
+                        <video id="main-media" controls>
+                            <source src="{{ product.video.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    {% else %}
+                        <img id="main-media" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
                     {% endif %}
-        
-                    {% for image in product.images.all %}
-                        <div class="gallery-item">
-                            <img class="gallery-image" src="{{ image.image.url }}" alt="{{ product.name }}" data-large="{{ image.image.url }}">
-                        </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
+        
         
         
         
@@ -45,10 +48,10 @@
     
         <!-- Product Information Section -->
         <div class="product-info">
-            <h1>{{ product.name }}</h1>
-            <p><strong>Catégorie:</strong> {{ product.category.name }}</p>
-            <p class="product-price"><strong>Prix:</strong> {{ product.price }} MAD</p>
-            <p class="product-description">{{ product.description }}</p>
+            <h1 style="text-align: center;">{{ product.name }}</h1>
+            <p style="text-align: center;"><strong>Catégorie:</strong> {{ product.category.name }}</p>
+            <p class="product-price" style="text-align: center;"><strong>Prix:</strong> {{ product.price }} MAD</p>
+            <p class="product-description" style="text-align: center;">{{ product.description|linebreaks_to_br|safe }}</p>
             <div class="product-cart-style">
             
         
@@ -94,6 +97,13 @@
                     <div class="price-info">
                         <div class="invoice-row">
                             <span>Prix du produit</span><span><span id="total-price">{{ product.price }}</span>MAD</span>
+                        </div>
+                        <div class="invoice-row" id="second-product-row">
+                            <span>Prix du 2ème produit</span><span><span id="total-price">{{ product.price|divide:2 }}</span>MAD</span>
+                        </div>
+                        <!-- New row for the second product price -->
+                        <div class="invoice-row" id="second-product-row" style="display: none;">
+                            <span>Prix du 2ème produit</span><span><span>{{ product.price |divide:2 }}</span>MAD</span>
                         </div>
                         <div class="invoice-row">
                             <span>Frais de livraison</span><span id="shipping-fee">Gratuite</span>
@@ -142,6 +152,40 @@
                         <button type="submit" class="btn-place-order">Passer la commande</button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 20px;">
+        <div class="title_one">
+            <h3 class="headline_one">Reviews</h3>
+        </div>
+        <div class="reviews-slider-container">
+            <!-- Slider Controls -->
+            <button class="slider-control prev" onclick="moveSlide(-1)">&#10094;</button>
+            <button class="slider-control next" onclick="moveSlide(1)">&#10095;</button>
+        
+            <!-- Slider -->
+            <div class="reviews-slider">
+                {% for review in reviews %}
+                    <div class="review-slide">
+                        <div class="review">
+                            <!-- Image Column -->
+                            <div class="review-image">
+                                <img src="{{ review.image.url }}" alt="{{ review.name }}" />
+                            </div>
+                            <!-- Content Column -->
+                            <div class="review-details">
+                                <div class="review-header">
+                                    <strong>{{ review.name }}</strong>
+                                    <span class="review-date"><small>{{ review.created_at }}</small></span>
+                                </div>
+                                <p class="review-content">{{ review.content }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="no-reviews">No reviews yet.</p>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -221,6 +265,8 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const offerCheckbox  = document.getElementById('offer-checkbox');
+        const secondProductPriceElement = document.getElementById('second-product-price');
+        const secondProductRow = document.getElementById('second-product-row');
         const faqItems = document.querySelectorAll(".faq-item");
         const addonCheckboxes = document.querySelectorAll(".addon-checkbox");
         //const shippingRadios = document.querySelectorAll("input[name='shipping']");
@@ -236,14 +282,26 @@
             let totalPrice = parseFloat(finalPriceElement.innerText.replace('MAD', ''));
 
             if (offerCheckbox.checked) {
-                totalPrice = totalPrice + (totalPrice / 2);  // Apply 50% off for the second product
+                secondProductRow.classList.add('visible');
+                totalPrice = totalPrice + (basePrice / 2);  // Apply 50% off for the second product
             } else {
-                totalPrice = totalPrice - (totalPrice / 3);  // Remove the discount if checkbox is unchecked
+                secondProductRow.classList.remove('visible');
+                totalPrice = totalPrice - (basePrice / 2);  // Remove the discount if checkbox is unchecked
             }
 
             // Update the final price display
             finalPriceElement.innerText = totalPrice.toFixed(2);
         });
+        let currentSlide = 0;
+        const slider = document.querySelector('.reviews-slider');
+        const slides = document.querySelectorAll('.review-slide');
+        const totalSlides = slides.length;
+
+        // Function to move the slider
+        function moveSlide(direction) {
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            slider.style.transform = `translateX(-${currentSlide * 620}px)`; // 600px slide width + 20px gap
+        }
         faqItems.forEach((item) => {
             const question = item.querySelector(".faq-question");
             const answer = item.querySelector(".faq-answer");
@@ -334,7 +392,8 @@
         updateTotalPrice();
 
         // Select all gallery images and main media (image or video)
-        const galleryItems = document.querySelectorAll(".gallery-image");
+        const galleryItems = document.querySelectorAll(".gallery-image"); 
+        let mainMediaWrapper = document.querySelector(".main-media-wrapper"); // Main media container
         let mainMedia = document.getElementById("main-media");
 
         galleryItems.forEach(item => {
@@ -351,10 +410,9 @@
                     newMedia.controls = true;
                     newMedia.autoplay = true;
                     newMedia.loop = true;
-                    newMedia.style.width = "100%"; // Ensure video fills the container
-                    newMedia.style.height = "auto"; // Maintain aspect ratio
-                    newMedia.style.display = "block"; // Ensure visibility
-                    newMedia.style.objectFit = "cover"; // Ensure it fits within the frame
+                    newMedia.style.width = "100%"; 
+                    newMedia.style.height = "100%"; 
+                    newMedia.style.objectFit = "cover";
 
                     // Create and append the source element
                     const source = document.createElement("source");
@@ -368,29 +426,53 @@
                     newMedia.id = "main-media";
                     newMedia.src = imageUrl;
                     newMedia.alt = "Product Image";
-                    newMedia.style.width = "100%"; // Ensure image fills container
-                    newMedia.style.height = "auto";
-                    newMedia.style.display = "block"; // Ensure visibility
+                    newMedia.style.width = "100%";
+                    newMedia.style.height = "100%";
+                    newMedia.style.objectFit = "cover";
                 }
 
-                // Replace the existing main media with the new one
+                // Replace the existing media while keeping the container size
                 if (newMedia) {
-                    mainMedia.parentNode.replaceChild(newMedia, mainMedia);
+                    mainMediaWrapper.innerHTML = ""; // Clear previous media
+                    mainMediaWrapper.appendChild(newMedia); // Insert new media
                     mainMedia = newMedia; // Update reference to new media
                 }
             });
         });
 
+
+
     });
 </script>
 
 <style>
-/* General Styles */
+/* Initial state of the second product row */
+#second-product-row {
+    visibility: hidden; /* Hidden initially */
+    height: 0;
+    overflow: hidden;
+    transition: visibility 0s, height 0.3s ease-in-out; /* Smooth transition */
+    margin: 0;
+    padding: 0px 7px;
+}
+
+/* When the offer checkbox is checked, the row is visible */
+#second-product-row.visible {
+    visibility: visible;
+    height: auto;  /* Allow natural height */
+}
+
+/* Optional styling for the second product price */
+#second-product-price {
+    color: #ff6600;  /* Orange color for discounted price */
+    font-weight: bold;
+}
+
 #namo {
     background-repeat: no-repeat;
     background-position: left center; /* Position the image on the left side */
     background-size: 39px 39px; /* Size the icon to fit within the input box */
-    padding-left: 60px; /* Add padding to the left so the text doesn't overlap with the icon */
+    padding-left: 40px; /* Add padding to the left so the text doesn't overlap with the icon */
     padding-right: 10px; /* Optional: add some space on the right for text */
     font-size: 16px; /* Adjust font size for better readability */
     border: 1px solid #ddd; /* Border for the input field */
@@ -721,95 +803,79 @@
     border-radius: 8px;
 }
 /* Ensure the main media (image or video) has a fixed size */
-/* Main media container */
+/* Main media container (fixed size) */
+.media-container {
+    display: flex;
+    gap: 15px; /* Space between thumbnails and main image */
+    align-items: center; /* Align thumbnails and main media */
+    justify-content: center;
+}
 .main-media-wrapper {
-    width: 500px; /* Fixed width */
+    width: 500px;  /* Fixed width */
     height: 500px; /* Fixed height */
-    margin: 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+    position: relative;
+    border-radius: 8px;
+    background-color: black;
 }
 
-/* Ensures video and images have the same dimensions */
+/* Ensures both images and videos maintain the same dimensions */
 #main-media {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Make sure it fills the box */
+    object-fit: cover; /* Ensures uniform fit */
     border-radius: 8px;
     background-color: #000;
 }
 
-/* Force video to match the same size as images */
-video#main-media {
+/* Ensure videos and images are the same size */
+.main-media-wrapper img,
+.main-media-wrapper video {
     width: 100% !important;
     height: 100% !important;
+    object-fit: cover !important;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Force video to match the same size as images */
+video#main-media {
     object-fit: cover !important;
     display: block;
     background-color: black;
 }
 
-/* Ensure container keeps a fixed size when switching media */
-.main-media-wrapper video, 
-.main-media-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Responsive adjustments for mobile */
-@media (max-width: 768px) {
-    .main-media-wrapper {
-        width: 100%;
-        max-height: 350px;
-    }
-
-    /* Keep images and videos the same height on mobile */
-    #main-media {
-        width: 100%;
-        height: 350px;
-    }
-
-    video#main-media {
-        height: 350px !important;
-    }
-
-    .gallery-item {
-        width: 60px;
-        height: 60px;
-    }
-    .gallery-container {
-        padding-left: 40px;
-    }
-}
-
-/* Scrollable thumbnails */
+/* ===== Make Thumbnails Vertical Instead of Horizontal ===== */
 .gallery-container {
-    width: 100%;
-    overflow-x: auto; /* Allows horizontal scrolling */
-    white-space: nowrap; /* Prevents items from wrapping */
-    margin-top: 10px;
+    height: 500px; /* Match main media height */
+    display: flex;
+    flex-direction: column; /* Stack thumbnails vertically */
+    overflow-y: auto; /* Allow vertical scrolling */
+    gap: 10px;
+    scrollbar-width: thin; /* Hide scrollbar */
 }
 
-/* Thumbnails remain in a single row */
+/* Make the gallery a vertical column */
 .product-gallery {
     display: flex;
+    flex-direction: column; /* Make items vertical */
     gap: 10px;
-    flex-wrap: nowrap; /* Prevents jumping to a new line */
 }
 
-/* Each thumbnail */
+/* Style for each thumbnail */
 .gallery-item {
     cursor: pointer;
-    width: 80px;
-    height: 80px;
-    flex: 0 0 auto;
-    overflow: hidden;
+    width: 80px;  /* Fixed width */
+    height: 80px; /* Fixed height */
     display: flex;
     justify-content: center;
     align-items: center;
     background: #f8f8f8;
     border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
 }
 
 /* Thumbnails */
@@ -834,6 +900,45 @@ video#main-media {
     max-height: 100%;
     object-fit: cover;
 }
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    .media-container {
+        flex-direction: column; /* Stack vertically for mobile */
+    }
+
+    .main-media-wrapper {
+        width: 100%;
+        max-height: 350px;
+    }
+
+    #main-media {
+        width: 100%;
+        height: 350px;
+    }
+
+    video#main-media {
+        height: 350px !important;
+    }
+
+    /* Adjust gallery container for mobile */
+    .gallery-container {
+        flex-direction: row; /* Thumbnails horizontal on mobile */
+        height: auto;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .product-gallery {
+        flex-direction: row;
+    }
+
+    .gallery-item {
+        width: 60px;
+        height: 60px;
+    }
+}
+
 /* Container for the checkbox */
 .p-checkbox-container {
     margin: 15px 0;

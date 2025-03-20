@@ -148,6 +148,41 @@
         </a>
       </div>
     </div>
+    
+    <div class="title_one">
+      <h3 class="headline_one">Reviews</h3>
+    </div>
+    <div class="reviews-slider-container">
+      <!-- Slider Controls -->
+      <button class="slider-control prev" onclick="moveSlide(-1)">&#10094;</button>
+      <button class="slider-control next" onclick="moveSlide(1)">&#10095;</button>
+  
+      <!-- Slider -->
+      <div class="reviews-slider">
+          {% for review in reviews %}
+              <div class="review-slide">
+                  <div class="review">
+                      <!-- Image Column -->
+                      <div class="review-image">
+                          <img src="{{ review.image.url }}" alt="{{ review.name }}" />
+                      </div>
+                      <!-- Content Column -->
+                      <div class="review-details">
+                          <div class="review-header">
+                              <strong>{{ review.name }}</strong>
+                              <span class="review-date"><small>{{ review.created_at }}</small></span>
+                          </div>
+                          <p class="review-content">{{ review.content }}</p>
+                      </div>
+                  </div>
+              </div>
+          {% empty %}
+              <p class="no-reviews">No reviews yet.</p>
+          {% endfor %}
+      </div>
+    </div>
+    
+
     <!-- ===================================================== Video ================================================-->
     <div class="title_one">
       <h3 class="headline_one">Le glamour en mouvement</h3>
@@ -157,4 +192,21 @@
         <source src="{% static 'images/vi.mp4' %}" type="video/mp4" />
       </video>
     </div>
+<style>
+/* Container for the entire slider */
+/* Container for the entire slider */
+/* Container for the entire slider */
+</style>
+<script>
+  let currentSlide = 0;
+  const slider = document.querySelector('.reviews-slider');
+  const slides = document.querySelectorAll('.review-slide');
+  const totalSlides = slides.length;
+
+  // Function to move the slider
+  function moveSlide(direction) {
+      currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+      slider.style.transform = `translateX(-${currentSlide * 620}px)`; // 600px slide width + 20px gap
+  }
+</script>
 {% endblock %}
